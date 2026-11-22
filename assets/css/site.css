@@ -535,3 +535,4 @@ a.is-masked:not(.btn):not(.callbox__num)::after { content: "pokaż"; display: in
 .callbox__num { font-size: 18px; font-weight: 500; color: inherit; text-decoration: none; font-variant-numeric: tabular-nums; }
 .callbox__num.is-masked { color: var(--fg-2); }
 .callbox .btn[hidden] { display: none; }
+.proc__photo video { width: 100%; height: 100%; object-fit: cover; display: block; }
