@@ -1,167 +1,78 @@
-/* Wariant A „Kino”: ciemny granat, wideo na całą szerokość ekranu, mało elementów. */
-
+/* Wariant A „Kino”: ciemny granat, wideo na całą szerokość, szkło i poświaty w kolorach marki. */
 :root {
-  --bg: var(--navy);
-  --fg: var(--white);
-  --fg-2: rgba(255, 255, 255, .74);
-  --fg-3: rgba(255, 255, 255, .58);
-  --line: rgba(255, 255, 255, .14);
-  --line-2: rgba(255, 255, 255, .32);
-  --hover: rgba(255, 255, 255, .07);
-  --accent: var(--light);
-  --tbc: var(--light);
-  --focus: var(--light);
-  --btn-bg: var(--white); --btn-fg: var(--navy); --btn-bg-h: var(--light);
-  --nav-fg: var(--white); --nav-bg: rgba(7, 26, 49, .78); --nav-line: rgba(255, 255, 255, .08);
-  --nav-logo-top: var(--white); --nav-logo-water: var(--light);
-  --wl-top: var(--white); --wl-water: var(--light);
-  --slot-bg: linear-gradient(160deg, #143861 0%, #0D2849 55%, #0A2040 100%);
-  --slot-fg: rgba(255, 255, 255, .9);
-  --doc-bg: #0E2A4C;
-  --map-pl: #17406E; --map-pl-line: rgba(156, 195, 238, .55); --map-others: #0E2A4C; --map-line: rgba(255, 255, 255, .08);
-  --dot: var(--light); --dot-ring: rgba(156, 195, 238, .22); --tip-bg: var(--white); --tip-fg: var(--navy);
-  --chip-on-bg: var(--white); --chip-on-fg: var(--navy);
-  --field-bg: rgba(255, 255, 255, .06); --field-line: rgba(255, 255, 255, .22); --ring: rgba(156, 195, 238, .25);
-  --err: #FFB4A8;
-  --r-m: 14px;
-}
-
-/* hero: wideo na cały ekran, tekst na spokojnej, ciemnej części kadru */
-.hero { height: 100svh; min-height: 660px; display: flex; flex-direction: column; justify-content: flex-end; padding-bottom: 148px; overflow: hidden; background: var(--deep); color: var(--white); }
-.hero__media { position: absolute; inset: 0; }
-.hero__shade { position: absolute; inset: 0; pointer-events: none;
-  background:
-    linear-gradient(180deg, rgba(7, 26, 49, .62) 0%, rgba(7, 26, 49, 0) 20%),
-    linear-gradient(0deg, rgba(7, 26, 49, .92) 0%, rgba(7, 26, 49, .55) 30%, rgba(7, 26, 49, 0) 62%),
-    linear-gradient(90deg, rgba(7, 26, 49, .5) 0%, rgba(7, 26, 49, 0) 55%); }
-.hero__text { position: relative; z-index: 2; }
-.hero__title { max-width: 11em; }
-.hero__aside { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 28px 48px; margin-top: 30px; }
-.hero__lead { color: rgba(255, 255, 255, .86); }
-.hero__bar { position: absolute; z-index: 3; left: 0; right: 0; bottom: 30px; margin-inline: auto; width: min(100% - 2 * var(--gut), var(--maxw)); display: flex; align-items: center; justify-content: space-between; gap: 24px; padding-top: 22px; border-top: 1px solid rgba(255, 255, 255, .2); }
-.partners__label { color: rgba(255, 255, 255, .72); }
-.hero .pl { filter: brightness(0) invert(1); opacity: .92; }
-
-/* oferta: trzy pionowe kadry od krawędzi do krawędzi */
-.offer { display: flex; flex-direction: column; padding-bottom: 0; }
-.offer__grid { flex: 1; display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; margin-top: 52px; min-height: 520px; }
-.card__media { position: absolute; inset: 0; }
-.card__media::after { content: ""; position: absolute; inset: 0; background: linear-gradient(0deg, rgba(7, 26, 49, .95) 0%, rgba(7, 26, 49, .6) 34%, rgba(7, 26, 49, .05) 62%); transition: opacity .5s; }
-.card__body { position: relative; z-index: 1; margin-top: auto; padding: 0 clamp(24px, 3vw, 44px) clamp(28px, 3vw, 40px); }
-.card__text { color: rgba(255, 255, 255, .8); }
-.card { min-height: 100%; }
-.card::before { content: ""; position: absolute; inset: 0; z-index: 2; border: 1px solid transparent; transition: border-color .3s; pointer-events: none; }
-.card:hover::before { border-color: rgba(156, 195, 238, .5); }
-
-/* liczby: nagranie na linii wody na całym ekranie */
-.stats { display: flex; overflow: hidden; background: var(--deep); }
-.stats__media { position: absolute; inset: 0; }
-.stats__media video { width: 100%; height: 100%; object-fit: cover; }
-.stats__shade { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(7, 26, 49, .82) 0%, rgba(7, 26, 49, .45) 45%, rgba(7, 26, 49, .82) 100%); }
-.stats__inner { display: flex; flex-direction: column; justify-content: space-between; gap: 72px; }
-.stat { border-top-color: rgba(255, 255, 255, .3); }
-
-/* realizacje */
-.cases { background: var(--navy); }
-.case { gap: 22px; }
-.case__media { border-radius: 4px; }
-.slot { border-radius: 4px; }
-.map { --dot: var(--light); }
-
-/* od akwenu do sezonu */
-.proc { background: var(--deep); }
-.proc__frame { border-radius: 4px; }
-
-/* sport: pod wodą na całym ekranie */
-.sport { display: flex; align-items: stretch; overflow: hidden; background: var(--deep); }
-.sport__media { position: absolute; inset: 0; }
-.sport__bg { width: 100%; height: 100%; object-fit: cover; }
-.timer__video, .lake { display: none; }
-.sport__shade { position: absolute; inset: 0; background: linear-gradient(90deg, rgba(7, 26, 49, .92) 0%, rgba(7, 26, 49, .72) 45%, rgba(7, 26, 49, .25) 100%), linear-gradient(0deg, rgba(7, 26, 49, .6), rgba(7, 26, 49, 0) 40%); }
-.sport > .wrap { min-height: calc(100svh - var(--padt) - var(--padb)); }
-.sport__text { grid-column: 1 / span 6; }
-.timer { grid-column: 9 / span 4; background: rgba(7, 26, 49, .62); border: 1px solid rgba(255, 255, 255, .16); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); }
-
-/* dla kogo: jedyny jasny ekran, oddech między ciemnymi sekcjami */
-.who { --fg: var(--navy); --fg-2: #3D4D5E; --fg-3: var(--steel); --line: #D3DCE5; --line-2: #B9C6D3; --accent: var(--water); --hover: rgba(11, 35, 64, .05); --focus: var(--water);
-  background: var(--mist); color: var(--fg); }
-.who .link--more { color: var(--navy); }
-
-/* kontakt: puste jezioro o świcie */
-.contact { display: flex; align-items: center; overflow: hidden; background: var(--deep); }
-.contact__media { position: absolute; inset: 0; }
-.contact__media video { width: 100%; height: 100%; object-fit: cover; }
-.contact__shade { position: absolute; inset: 0; background: linear-gradient(90deg, rgba(7, 26, 49, .9) 0%, rgba(7, 26, 49, .62) 48%, rgba(7, 26, 49, .4) 100%), linear-gradient(0deg, rgba(7, 26, 49, .6), rgba(7, 26, 49, 0) 45%); }
-.form { background: rgba(7, 26, 49, .66); border: 1px solid rgba(255, 255, 255, .14); -webkit-backdrop-filter: blur(18px); backdrop-filter: blur(18px); }
-.field select option { color: var(--navy); }
-
-/* stopka */
-.footer { background: var(--deep); --logo-top: var(--white); --logo-water: var(--light); }
-
-@media (max-width: 1023px) {
-  .hero { padding-bottom: 168px; }
-  .offer__grid { grid-template-columns: 1fr; min-height: 0; }
-  .offer .card { min-height: 64svh; }
-  .sport__shade { background: linear-gradient(0deg, rgba(7, 26, 49, .95) 0%, rgba(7, 26, 49, .7) 55%, rgba(7, 26, 49, .45) 100%); }
-}
-@media (max-width: 767px) {
-  .hero { padding-bottom: 176px; min-height: 600px; }
-  .hero__bar { flex-wrap: wrap; bottom: 20px; padding-top: 16px; }
-  .hero__ctrl { position: absolute; right: 0; top: 14px; }
-  .hero__actions .btn { flex: 1; }
-  .offer .card { min-height: 72svh; }
-}
-
-/* poprawki: tablet i telefon */
-@media (max-width: 1023px) {
-  .sport__text, .timer { grid-column: 1 / -1; }
-  .sport > .wrap { min-height: 0; }
-  .contact__shade { background: linear-gradient(180deg, rgba(7, 26, 49, .88) 0%, rgba(7, 26, 49, .62) 40%, rgba(7, 26, 49, .9) 100%); }
-}
-
-/* ------------------------------------------------------------------ gradienty 2026 (A) */
-:root {
-  --btn-grad: linear-gradient(115deg in oklab, #FFFFFF 0%, #EEF5FD 40%, #BCD8F5 70%, #FFFFFF 100%);
+  --bg: var(--navy); --fg: var(--white); --fg-2: rgba(255, 255, 255, .74); --fg-3: rgba(255, 255, 255, .56);
+  --line: rgba(255, 255, 255, .14); --line-2: rgba(255, 255, 255, .32); --hover: rgba(255, 255, 255, .08);
+  --accent: var(--light); --tbc: var(--light); --focus: var(--light);
+  --btn-grad: linear-gradient(115deg in oklab, #FFFFFF 0%, #EEF5FD 40%, #BCD8F5 70%, #FFFFFF 100%); --btn-fg: var(--navy);
   --btn-shadow: inset 0 1px 0 rgba(255, 255, 255, .9), 0 12px 30px -14px rgba(156, 195, 238, .75);
   --btn-shadow-h: inset 0 1px 0 rgba(255, 255, 255, .9), 0 16px 36px -12px rgba(156, 195, 238, .9);
-  --edge: linear-gradient(140deg, rgba(255, 255, 255, .5), rgba(255, 255, 255, .06) 40%, rgba(156, 195, 238, .1) 70%, rgba(156, 195, 238, .55));
-  --wl-grad: linear-gradient(90deg in oklab, #9CC3EE 0%, #DCEBFB 100%);
-  --map-g1: #2A5E9E; --map-g2: #123760;
-  --slot-bg:
-    radial-gradient(80% 70% at 88% 12%, rgba(156, 195, 238, .38), rgba(156, 195, 238, 0) 60%),
-    radial-gradient(70% 80% at 8% 100%, rgba(47, 111, 181, .6), rgba(47, 111, 181, 0) 65%),
-    linear-gradient(160deg in oklab, #143861, #0A2040);
-  --doc-bg:
-    radial-gradient(70% 70% at 90% 10%, rgba(156, 195, 238, .3), rgba(156, 195, 238, 0) 60%),
-    radial-gradient(70% 70% at 0% 100%, rgba(47, 111, 181, .55), rgba(47, 111, 181, 0) 65%),
-    #0E2A4C;
+  --ghost-bg: rgba(255, 255, 255, .06);
+  --nav-fg: var(--white); --nav-bg: rgba(7, 26, 49, .62); --nav-line: rgba(255, 255, 255, .14);
+  --nav-logo-top: var(--white); --nav-logo-water: var(--light);
+  --ico-bg: linear-gradient(150deg in oklab, rgba(156, 195, 238, .22), rgba(47, 111, 181, .14)); --ico-fg: var(--white); --ico-water: var(--light);
+  --ico-edge: inset 0 0 0 1px rgba(255, 255, 255, .16);
+  --wl-top: var(--white); --wl-grad: linear-gradient(90deg in oklab, #9CC3EE 0%, #DCEBFB 100%);
+  --card-bg: linear-gradient(170deg in oklab, rgba(255, 255, 255, .07), rgba(255, 255, 255, .02)); --card-edge: inset 0 0 0 1px rgba(255, 255, 255, .12);
+  --glow: rgba(156, 195, 238, .16);
+  --form-bg: linear-gradient(160deg in oklab, rgba(47, 111, 181, .34) 0%, rgba(7, 26, 49, .74) 50%, rgba(7, 26, 49, .84) 100%);
+  --form-edge: inset 0 0 0 1px rgba(255, 255, 255, .14), 0 40px 80px -40px rgba(0, 0, 0, .6);
+  --field-bg: rgba(255, 255, 255, .06); --field-line: rgba(255, 255, 255, .22); --ring: rgba(156, 195, 238, .25); --err: #FFB4A8;
+  --brand-filter: brightness(0) invert(1);
 }
-.hero__shade { background:
-    radial-gradient(70% 60% at 0% 100%, rgba(47, 111, 181, .55), rgba(47, 111, 181, 0) 70%),
-    linear-gradient(180deg, rgba(7, 26, 49, .62) 0%, rgba(7, 26, 49, 0) 20%),
-    linear-gradient(0deg, rgba(7, 26, 49, .9) 0%, rgba(7, 26, 49, .5) 30%, rgba(7, 26, 49, 0) 62%),
-    linear-gradient(90deg, rgba(7, 26, 49, .45) 0%, rgba(7, 26, 49, 0) 55%); }
-.btn--ghost { background: rgba(255, 255, 255, .06); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); }
-.offer { background:
-    radial-gradient(70% 90% at 100% 0%, rgba(47, 111, 181, .48), rgba(47, 111, 181, 0) 62%),
-    radial-gradient(45% 70% at 0% 20%, rgba(156, 195, 238, .12), rgba(156, 195, 238, 0) 70%),
-    var(--navy); }
-.card__media::after { background: linear-gradient(0deg in oklab, rgba(7, 26, 49, .96) 0%, rgba(14, 48, 92, .62) 36%, rgba(47, 111, 181, .12) 62%, rgba(7, 26, 49, 0) 80%); }
-.cases { background:
-    radial-gradient(55% 45% at 0% 0%, rgba(47, 111, 181, .42), rgba(47, 111, 181, 0) 65%),
-    radial-gradient(55% 50% at 100% 72%, rgba(47, 111, 181, .32), rgba(47, 111, 181, 0) 65%),
-    linear-gradient(180deg, #0B2340, #0A1F3A); }
-.proc { background:
-    radial-gradient(50% 40% at 100% 8%, rgba(47, 111, 181, .4), rgba(47, 111, 181, 0) 70%),
-    radial-gradient(45% 45% at 0% 100%, rgba(156, 195, 238, .12), rgba(156, 195, 238, 0) 70%),
-    var(--deep); }
-.timer { border-color: transparent; background: linear-gradient(155deg in oklab, rgba(47, 111, 181, .42) 0%, rgba(7, 26, 49, .66) 55%, rgba(7, 26, 49, .8) 100%); }
-.who { --grain-o: .05; background:
-    radial-gradient(60% 85% at 100% 0%, rgba(156, 195, 238, .6), rgba(156, 195, 238, 0) 60%),
-    radial-gradient(50% 60% at 0% 100%, rgba(47, 111, 181, .14), rgba(47, 111, 181, 0) 65%),
-    var(--mist); }
-.form { border-color: transparent; background: linear-gradient(160deg in oklab, rgba(47, 111, 181, .34) 0%, rgba(7, 26, 49, .74) 50%, rgba(7, 26, 49, .82) 100%); }
-.footer { background:
-    radial-gradient(70% 60% at 50% 115%, rgba(47, 111, 181, .5), rgba(47, 111, 181, 0) 70%),
-    var(--deep); }
-.menu { background: radial-gradient(80% 50% at 100% 0%, rgba(47, 111, 181, .45), rgba(47, 111, 181, 0) 70%), var(--navy); }
+
+/* hero: wideo na cały ekran */
+.hero { height: 100svh; min-height: 700px; display: flex; flex-direction: column; justify-content: flex-end; padding-bottom: 40px; overflow: hidden; background: var(--deep); color: var(--white); }
+.hero__media { position: absolute; inset: 0; }
+.hero__shade { position: absolute; inset: 0; pointer-events: none; background:
+  radial-gradient(70% 60% at 0% 100%, rgba(47, 111, 181, .5), rgba(47, 111, 181, 0) 70%),
+  linear-gradient(180deg, rgba(7, 26, 49, .55) 0%, rgba(7, 26, 49, 0) 22%),
+  linear-gradient(0deg, rgba(7, 26, 49, .92) 0%, rgba(7, 26, 49, .55) 34%, rgba(7, 26, 49, 0) 66%),
+  linear-gradient(90deg, rgba(7, 26, 49, .5) 0%, rgba(7, 26, 49, 0) 60%); }
+.hero__pause { position: absolute; right: max(var(--gut), (100vw - var(--maxw)) / 2); bottom: 40px; z-index: 3; }
+.hero__text { position: relative; z-index: 2; }
+.hero__title { max-width: 12em; }
+.hero__aside { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 24px 48px; margin-top: 28px; padding-right: 70px; }
+.hero__lead { color: rgba(255, 255, 255, .86); }
+.hero__brands { margin-top: 36px; padding-top: 24px; border-top: 1px solid rgba(255, 255, 255, .18); }
+.hero__brands .pl { filter: brightness(0) invert(1); opacity: .9; }
+
+/* o firmie */
+.about { background: radial-gradient(60% 70% at 100% 0%, rgba(47, 111, 181, .38), rgba(47, 111, 181, 0) 65%), radial-gradient(45% 60% at 0% 100%, rgba(156, 195, 238, .1), rgba(156, 195, 238, 0) 70%), var(--navy); }
+.stat { border-top-color: rgba(255, 255, 255, .22); }
+
+/* oferta */
+.offer { --bg-sec: var(--deep); background: radial-gradient(55% 50% at 0% 0%, rgba(47, 111, 181, .3), rgba(47, 111, 181, 0) 65%), var(--deep); }
+.tile { box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .08); }
+
+/* parki: spotlight */
+.spot { background: var(--deep); }
+
+/* baseny sportowe */
+.sport { background: radial-gradient(55% 60% at 100% 30%, rgba(47, 111, 181, .38), rgba(47, 111, 181, 0) 65%), var(--navy); }
+
+/* współpraca */
+.proc { --bg-sec: var(--deep); background: radial-gradient(50% 50% at 0% 100%, rgba(156, 195, 238, .12), rgba(156, 195, 238, 0) 70%), var(--deep); }
+
+/* dla kogo */
+.who { background: radial-gradient(55% 60% at 100% 0%, rgba(47, 111, 181, .4), rgba(47, 111, 181, 0) 65%), var(--navy); }
+.who__card .ico { --ico-bg: linear-gradient(150deg in oklab, #1A4778, #0E2C50); box-shadow: 0 0 0 5px var(--navy), inset 0 0 0 1px rgba(255, 255, 255, .16); }
+
+/* kontakt: park z drona w tle */
+.contact { overflow: hidden; background: var(--deep); }
+.contact__media { position: absolute; inset: 0; }
+.contact__media video { width: 100%; height: 100%; object-fit: cover; }
+.contact__shade { position: absolute; inset: 0; background: linear-gradient(90deg, rgba(7, 26, 49, .94) 0%, rgba(7, 26, 49, .72) 45%, rgba(7, 26, 49, .5) 100%), radial-gradient(60% 60% at 0% 100%, rgba(47, 111, 181, .45), rgba(47, 111, 181, 0) 70%); }
+
+/* stopka */
+.footer { background: radial-gradient(70% 60% at 50% 115%, rgba(47, 111, 181, .5), rgba(47, 111, 181, 0) 70%), var(--deep); --logo-top: var(--white); --logo-water: var(--light); }
+
+@media (max-width: 1023px) {
+  .contact__shade { background: linear-gradient(180deg, rgba(7, 26, 49, .9) 0%, rgba(7, 26, 49, .7) 40%, rgba(7, 26, 49, .92) 100%); }
+}
+@media (max-width: 767px) {
+  .hero { min-height: 620px; padding-bottom: 24px; }
+  .hero__aside { padding-right: 0; }
+  .hero__actions .btn { flex: 1; }
+  .hero__pause { top: 82px; bottom: auto; right: var(--gut); }
+  .hero__brands { margin-top: 26px; padding-top: 18px; }
+}

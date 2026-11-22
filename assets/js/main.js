@@ -1,18 +1,17 @@
-/* Swimstone · strona główna · ruch i wideo (oba warianty).
-   Zasady: wideo gra tylko, gdy jest widoczne; jeden przycisk pauzy zatrzymuje wszystkie nagrania;
-   przy „ogranicz ruch” nic nie startuje samo, a liczby i nagłówki stoją od razu na miejscu. */
+/* Swimstone · strona główna v2 · ruch i wideo (oba warianty).
+   Wideo gra tylko, gdy jest widoczne; jeden przycisk pauzy zatrzymuje wszystkie nagrania.
+   Przy „ogranicz ruch” nic nie startuje samo, a efekty przewijania stoją w stanie końcowym. */
 (() => {
   const d = document;
+  const root = d.documentElement;
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const isPhone = () => innerWidth < 768;
+  const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
+  const ease = (t) => 1 - Math.pow(1 - t, 3);
   let paused = reduce;
 
   /* ---------------------------------------------------------------- nawigacja */
   const nav = d.querySelector('[data-nav]');
-  const onScroll = () => nav.classList.toggle('is-scrolled', scrollY > 24);
-  addEventListener('scroll', onScroll, { passive: true });
-  onScroll();
-
   const burger = d.querySelector('.nav__burger');
   const menu = d.getElementById('menu');
   const setMenu = (open) => {
@@ -24,7 +23,6 @@
   };
   burger.addEventListener('click', () => setMenu(burger.getAttribute('aria-expanded') !== 'true'));
   menu.addEventListener('click', (e) => { if (e.target.closest('a')) setMenu(false); });
-
   const langBtn = d.querySelector('.lang__btn');
   const langMenu = d.getElementById('lang-menu');
   const setLang = (open) => { langBtn.setAttribute('aria-expanded', String(open)); langMenu.hidden = !open; };
@@ -41,13 +39,11 @@
   const vids = [...d.querySelectorAll('video[data-src]')];
   const load = (v) => {
     if (v.dataset.loaded) return;
-    const mobileOk = !v.dataset.mOnly || v.dataset.mOnly === d.documentElement.dataset.variant;
-    v.src = (isPhone() && mobileOk && v.dataset.srcM) || v.dataset.src;
+    v.src = (isPhone() && v.dataset.srcM) || v.dataset.src;
     v.dataset.loaded = '1';
   };
-  const gated = (v) => { const m = v.closest('[data-step-media]'); return m && !m.classList.contains('is-active'); };
   const tryPlay = (v) => {
-    if (paused || !v._vis || gated(v)) return;
+    if (paused || !v._vis) return;
     load(v);
     const p = v.play();
     if (p) p.catch(() => {});
@@ -57,49 +53,25 @@
     const v = e.target;
     v._vis = e.isIntersecting;
     if (v._vis) { load(v); tryPlay(v); } else v.pause();
-  }), { rootMargin: '120px 0px', threshold: 0.01 });
+  }), { rootMargin: '160px 0px', threshold: 0.01 });
   vids.forEach((v) => vio.observe(v));
 
-  /* pauza: przycisk w hero + pływający przycisk, gdy hero zniknie z ekranu */
   const pauseBtns = [...d.querySelectorAll('[data-pause]')];
-  const syncPauseBtn = () => pauseBtns.forEach((b) => {
+  const syncPause = () => pauseBtns.forEach((b) => {
     b.setAttribute('aria-pressed', String(paused));
     b.setAttribute('aria-label', paused ? 'Odtwórz wideo na stronie' : 'Zatrzymaj wideo na stronie');
   });
   pauseBtns.forEach((b) => b.addEventListener('click', () => {
     paused = !paused;
-    syncPauseBtn();
+    syncPause();
     vids.forEach((v) => (paused ? v.pause() : tryPlay(v)));
   }));
-  syncPauseBtn();
+  syncPause();
+  const hero = d.querySelector('[data-hero]');
   const vfloat = d.querySelector('.vfloat');
-  new IntersectionObserver(([e]) => vfloat.classList.toggle('is-on', !e.isIntersecting))
-    .observe(d.querySelector('[data-hero]'));
-
-  /* sceny montażu w hero (granice ujęć z src/web_video.py) */
-  const heroV = d.querySelector('[data-hero-video]');
-  const scenes = [...d.querySelectorAll('.scene')];
-  const cuts = [0, 5.15, 12.45, 15.75, 19.95];
-  const sceneAt = (t) => { for (let i = 3; i >= 0; i--) if (t >= cuts[i]) return i; return 0; };
-  let rafScene = 0;
-  const drawScene = () => {
-    const t = heroV.currentTime % 20.4;
-    const i = t >= cuts[4] ? 0 : sceneAt(t);
-    const a = cuts[i];
-    const b = cuts[i + 1];
-    scenes.forEach((s, k) => {
-      s.classList.toggle('is-on', k === i);
-      s.querySelector('i').style.setProperty('--p', k < i ? 1 : k === i ? Math.min(1, (t - a) / (b - a)) : 0);
-    });
-    if (!heroV.paused) rafScene = requestAnimationFrame(drawScene);
-  };
-  heroV.addEventListener('play', () => { cancelAnimationFrame(rafScene); rafScene = requestAnimationFrame(drawScene); });
-  heroV.addEventListener('pause', drawScene);
-  heroV.addEventListener('loadedmetadata', drawScene);
-  scenes[0].classList.add('is-on');
+  new IntersectionObserver(([e]) => vfloat.classList.toggle('is-on', !e.isIntersecting)).observe(hero);
 
   /* ---------------------------------------------------------------- wejście hero (raz) */
-  const hero = d.querySelector('[data-hero]');
   const enter = () => requestAnimationFrame(() => hero.classList.add('is-in'));
   (d.fonts && d.fonts.ready ? d.fonts.ready : Promise.resolve()).then(enter);
   setTimeout(enter, 900);
@@ -114,9 +86,30 @@
     rv.forEach((el) => rio.observe(el));
   }
 
+  /* ---------------------------------------------------------------- zdanie podświetlane słowo po słowie */
+  const statement = d.querySelector('[data-statement]');
+  const words = [];
+  const wrapWords = (node) => {
+    [...node.childNodes].forEach((n) => {
+      if (n.nodeType === 3) {
+        const frag = d.createDocumentFragment();
+        n.textContent.split(/(\s+)/).forEach((part) => {
+          if (!part) return;
+          if (/^\s+$/.test(part)) { frag.append(d.createTextNode(part)); return; }
+          const s = d.createElement('span');
+          s.className = 'w';
+          s.textContent = part;
+          words.push(s);
+          frag.append(s);
+        });
+        n.replaceWith(frag);
+      } else if (n.nodeType === 1) wrapWords(n);
+    });
+  };
+  if (statement && !reduce) wrapWords(statement);
+
   /* ---------------------------------------------------------------- liczby z wodą */
   const wls = [...d.querySelectorAll('.wl')];
-  const fmt = (n) => String(Math.round(n));
   wls.forEach((el) => {
     const txt = el.textContent;
     const top = d.createElement('span');
@@ -132,29 +125,20 @@
     el.replaceChildren(top, water);
   });
   const measure = () => wls.forEach((el) => {
-    const probe = el.querySelector('.wl__probe');
     const fs = parseFloat(getComputedStyle(el).fontSize);
-    const base = probe.offsetTop;
-    el.style.setProperty('--cut', `${(base - 0.11 * fs).toFixed(1)}px`);
+    el.style.setProperty('--cut', `${(el.querySelector('.wl__probe').offsetTop - 0.11 * fs).toFixed(1)}px`);
   });
-  const setText = (el, s) => {
-    el.querySelector('.wl__t').firstChild.nodeValue = s;
-    el.querySelector('.wl__w').textContent = s;
-  };
+  const setText = (el, s) => { el.querySelector('.wl__t').firstChild.nodeValue = s; el.querySelector('.wl__w').textContent = s; };
   const count = (el) => {
     const to = parseFloat(el.dataset.count);
     if (Number.isNaN(to) || reduce) { el.classList.add('is-wet'); return; }
     const from = parseFloat(el.dataset.from || 0);
     const t0 = performance.now();
-    const dur = 1500;
     const tick = (now) => {
-      const k = Math.min(1, (now - t0) / dur);
-      const e = 1 - Math.pow(1 - k, 3);
-      setText(el, fmt(from + (to - from) * e));
-      if (k < 1) requestAnimationFrame(tick);
-      else { setText(el, fmt(to)); el.classList.add('is-wet'); }
+      const k = Math.min(1, (now - t0) / 1500);
+      setText(el, String(Math.round(from + (to - from) * ease(k))));
+      if (k < 1) requestAnimationFrame(tick); else el.classList.add('is-wet');
     };
-    setText(el, fmt(from));
     requestAnimationFrame(tick);
   };
   (d.fonts && d.fonts.ready ? d.fonts.ready : Promise.resolve()).then(measure);
@@ -163,71 +147,74 @@
     if (!e.isIntersecting) return;
     sio.unobserve(e.target);
     measure();
-    setTimeout(() => count(e.target), 120 * wls.indexOf(e.target));
+    setTimeout(() => count(e.target), 140 * wls.indexOf(e.target));
   }), { threshold: 0.6 });
   wls.forEach((el) => sio.observe(el));
 
-  /* ---------------------------------------------------------------- od akwenu do sezonu */
-  const steps = [...d.querySelectorAll('.step')];
-  const media = [...d.querySelectorAll('[data-step-media]')];
-  const pips = [...d.querySelectorAll('.proc__dots li')];
-  const activate = (i) => {
-    steps.forEach((s, k) => s.classList.toggle('is-active', k === i));
-    pips.forEach((s, k) => s.classList.toggle('is-active', k <= i));
-    media.forEach((m, k) => {
-      const on = k === i;
-      m.classList.toggle('is-active', on);
-      const v = m.querySelector('video');
-      if (!v) return;
-      if (on) { v._vis = true; tryPlay(v); } else v.pause();
-    });
-  };
-  const pio = new IntersectionObserver((es) => es.forEach((e) => {
-    if (e.isIntersecting) activate(steps.indexOf(e.target));
-  }), { rootMargin: '-48% 0px -48% 0px' });
-  steps.forEach((s) => pio.observe(s));
+  /* ---------------------------------------------------------------- efekty przewijania (jedna pętla rAF) */
+  const spot = d.querySelector('[data-spot]');
+  const spotMedia = spot.querySelector('.spot__media');
+  const feats = [...spot.querySelectorAll('.feat'), spot.querySelector('.spot__cta')];
+  const heroMedia = d.querySelector('[data-hero-media]');
+  const steps = d.querySelector('[data-steps]');
+  const stepItems = [...steps.querySelectorAll('.step')];
+  const variantB = root.dataset.variant === 'kafle';
+  let ticking = false;
+  const frame = () => {
+    ticking = false;
+    const vh = innerHeight;
+    nav.classList.toggle('is-scrolled', scrollY > 24);
 
-  /* ---------------------------------------------------------------- stoper ALGE */
-  const timer = d.querySelector('[data-timer]');
-  const out = timer.querySelector('[data-timer-out]');
-  const lane = timer.querySelector('.is-me');
-  const to = parseFloat(timer.dataset.to);
-  const show = (s) => {
-    const m = Math.floor(s / 60);
-    const r = s - m * 60;
-    out.textContent = `${String(m).padStart(2, '0')}:${r.toFixed(2).padStart(5, '0')}`;
-    lane.style.setProperty('--lane', Math.min(1, s / to));
-  };
-  let tRaf = 0;
-  const run = () => {
-    cancelAnimationFrame(tRaf);
-    timer.classList.remove('is-done');
-    const t0 = performance.now();
-    const step = (now) => {
-      const s = (now - t0) / 1000;
-      if (s >= to) { show(to); timer.classList.add('is-done'); return; }
-      show(s);
-      tRaf = requestAnimationFrame(step);
-    };
-    tRaf = requestAnimationFrame(step);
-  };
-  if (reduce) { show(to); timer.classList.add('is-done'); }
-  else {
-    show(0);
-    new IntersectionObserver((es) => es.forEach((e) => {
-      if (e.isIntersecting && !timer.classList.contains('is-running')) { timer.classList.add('is-running'); run(); }
-      if (!e.isIntersecting) { timer.classList.remove('is-running'); }
-    }), { threshold: 0.5 }).observe(timer);
-  }
+    // B: wideo w hero rozszerza się do pełnej szerokości
+    if (variantB && !reduce) heroMedia.style.setProperty('--hp', clamp(scrollY / (vh * 0.45)).toFixed(3));
 
-  /* ---------------------------------------------------------------- mapa ↔ lista */
-  const dots = new Map([...d.querySelectorAll('.dot')].map((el) => [el.dataset.key, el]));
-  d.querySelectorAll('.row').forEach((r) => {
-    const dot = dots.get(r.dataset.key);
-    if (!dot) return;
-    r.addEventListener('mouseenter', () => dot.classList.add('is-hot'));
-    r.addEventListener('mouseleave', () => dot.classList.remove('is-hot'));
-  });
+    // zdanie: słowa zapalają się, gdy akapit przechodzi przez ekran
+    if (words.length) {
+      const r = statement.getBoundingClientRect();
+      const p = clamp((vh * 0.88 - r.top) / (r.height + vh * 0.42));
+      const lit = p * words.length;
+      words.forEach((w, i) => w.style.setProperty('--wo', (0.22 + 0.78 * clamp(lit - i)).toFixed(2)));
+    }
+
+    // parki: kafel z wideo rozszerza się do pełnego ekranu, potem pojawiają się karty
+    if (!reduce) {
+      const r = spot.getBoundingClientRect();
+      const p = clamp(-r.top / (r.height - vh));
+      spotMedia.style.setProperty('--e', ease(clamp(p / 0.42)).toFixed(3));
+      spot.style.setProperty('--h', ease(clamp((p - 0.18) / 0.22)).toFixed(3));
+      feats.forEach((f, i) => f.style.setProperty('--f', ease(clamp((p - 0.42 - i * 0.06) / 0.2)).toFixed(3)));
+    }
+
+    // współpraca: linia postępu i kolejne kroki
+    {
+      const r = steps.getBoundingClientRect();
+      const p = reduce ? 1 : clamp((vh * 0.8 - r.top) / (vh * 0.55));
+      steps.style.setProperty('--pp', p.toFixed(3));
+      stepItems.forEach((s, i) => s.classList.toggle('is-on', p >= i / (stepItems.length - 1) - 0.02));
+    }
+  };
+  const onScroll = () => { if (!ticking) { ticking = true; requestAnimationFrame(frame); } };
+  addEventListener('scroll', onScroll, { passive: true });
+  addEventListener('resize', onScroll);
+  frame();
+
+  /* ---------------------------------------------------------------- oferta na telefonie: kropki przewijania */
+  const tiles = d.querySelector('[data-tiles]');
+  const dots = [...d.querySelectorAll('.tiles__dots i')];
+  tiles.addEventListener('scroll', () => {
+    const cards = [...tiles.children];
+    const x = tiles.scrollLeft + tiles.clientWidth * 0.3;
+    let idx = 0;
+    cards.forEach((c, i) => { if (c.offsetLeft - tiles.offsetLeft <= x) idx = i; });
+    dots.forEach((dot, i) => dot.classList.toggle('is-on', i === idx));
+  }, { passive: true });
+
+  /* ---------------------------------------------------------------- poświata za kursorem na kartach */
+  d.querySelectorAll('[data-glow]').forEach((card) => card.addEventListener('pointermove', (e) => {
+    const r = card.getBoundingClientRect();
+    card.style.setProperty('--mx', `${e.clientX - r.left}px`);
+    card.style.setProperty('--my', `${e.clientY - r.top}px`);
+  }));
 
   /* ---------------------------------------------------------------- formularz */
   const form = d.querySelector('[data-form]');
@@ -246,8 +233,5 @@
     });
     form.querySelector('.form__note').hidden = !ok;
   });
-  form.addEventListener('input', (e) => {
-    const box = e.target.closest('.is-invalid');
-    if (box) box.classList.remove('is-invalid');
-  });
+  form.addEventListener('input', (e) => { const box = e.target.closest('.is-invalid'); if (box) box.classList.remove('is-invalid'); });
 })();
