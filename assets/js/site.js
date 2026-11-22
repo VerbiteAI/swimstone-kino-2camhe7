@@ -24,6 +24,8 @@
   };
   burger.addEventListener('click', () => setMenu(burger.getAttribute('aria-expanded') !== 'true'));
   menu.addEventListener('click', (e) => { if (e.target.closest('a')) setMenu(false); });
+  const maccs = [...menu.querySelectorAll('.macc')];
+  maccs.forEach((m) => m.addEventListener('toggle', () => { if (m.open) maccs.forEach((o) => { if (o !== m) o.open = false; }); }));
   const langBtn = d.querySelector('.lang__btn');
   const langMenu = d.getElementById('lang-menu');
   const setLang = (open) => { langBtn.setAttribute('aria-expanded', String(open)); langMenu.hidden = !open; };
@@ -153,6 +155,7 @@
       if (label) label.textContent = on ? 'Dodano do zapytania' : 'Dodaj do zapytania';
       b.setAttribute('aria-pressed', String(on));
     });
+    d.querySelectorAll('[data-mbar-label]').forEach((l) => { l.textContent = quote.length ? `Wyślij zapytanie (${quote.length})` : 'Zapytaj o ofertę'; });
     d.querySelectorAll('[data-form-quote]').forEach((box) => {
       box.hidden = !quote.length;
       box.querySelector('[data-form-quote-list]').innerHTML = quote.map(item).join('');
@@ -361,6 +364,30 @@
       a.addEventListener('click', (e) => { if (!telShown) { e.preventDefault(); showTel(); } });
     });
     telButtons.forEach((b) => b.addEventListener('click', showTel));
+  }
+  d.querySelectorAll('[data-tel-call]').forEach((a) => a.addEventListener('click', () => { if (!telShown) showTel(); }));
+
+  /* ---------------------------------------------------------------- pasek na dole ekranu (telefon): zapytanie i telefon */
+  const mbar = d.querySelector('[data-mbar]');
+  if (mbar) {
+    const forms = [...d.querySelectorAll('[data-form]')];
+    const seen = new Set();
+    const upd = () => {
+      const on = scrollY > innerHeight * 0.6 && seen.size === 0;
+      mbar.classList.toggle('is-on', on);
+      mbar.inert = !on;
+    };
+    if (forms.length && 'IntersectionObserver' in window) {
+      const io = new IntersectionObserver((es) => { es.forEach((e) => (e.isIntersecting ? seen.add(e.target) : seen.delete(e.target))); upd(); }, { rootMargin: '0px 0px -15% 0px' });
+      forms.forEach((f) => io.observe(f));
+    }
+    addEventListener('scroll', upd, { passive: true });
+    upd();
+    mbar.querySelector('[data-mbar-cta]').addEventListener('click', (e) => {
+      if (!forms.length) return;
+      e.preventDefault();
+      forms[0].scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' });
+    });
   }
 
   /* ---------------------------------------------------------------- maska telefonu ___-___-___ */
