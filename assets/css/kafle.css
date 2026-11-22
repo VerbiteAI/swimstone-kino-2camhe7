@@ -1,0 +1,90 @@
+/* Wariant B „Kafle”: jasne tło, wideo i zdjęcia w zaokrąglonych kaflach, wideo w hero rozszerza się przy przewijaniu. */
+:root {
+  --bg: var(--white); --fg: var(--navy); --fg-2: #3D4D5E; --fg-3: var(--steel);
+  --line: #DCE3EA; --line-2: #BAC7D4; --hover: rgba(11, 35, 64, .05);
+  --accent: var(--water); --tbc: var(--water);
+  --btn-grad: linear-gradient(115deg in oklab, #0B2340 0%, #153F72 40%, #2F6FB5 75%, #0B2340 100%); --btn-fg: var(--white);
+  --btn-shadow: inset 0 1px 0 rgba(255, 255, 255, .16), 0 14px 30px -16px rgba(47, 111, 181, .8);
+  --btn-shadow-h: inset 0 1px 0 rgba(255, 255, 255, .16), 0 18px 36px -14px rgba(47, 111, 181, .95);
+  --ghost-bg: rgba(255, 255, 255, .7);
+  --nav-fg: var(--navy); --nav-bg0: rgba(255, 255, 255, .72); --nav-line0: rgba(11, 35, 64, .08); --nav-bg: rgba(255, 255, 255, .86); --nav-line: rgba(11, 35, 64, .1);
+  --nav-logo-top: var(--navy); --nav-logo-water: var(--water);
+  --ico-bg: linear-gradient(150deg in oklab, #FFFFFF, #E3EDF8); --ico-fg: var(--navy); --ico-water: var(--water);
+  --ico-edge: inset 0 0 0 1px rgba(47, 111, 181, .18), 0 8px 18px -12px rgba(47, 111, 181, .6);
+  --wl-top: var(--navy); --wl-grad: linear-gradient(90deg in oklab, #2F6FB5 0%, #7FB0E6 100%);
+  --card-bg: linear-gradient(180deg in oklab, #FFFFFF 0%, #F6F9FD 100%); --card-edge: inset 0 0 0 1px rgba(47, 111, 181, .12), 0 24px 48px -36px rgba(11, 35, 64, .45);
+  --glow: rgba(156, 195, 238, .35);
+  --form-bg: linear-gradient(170deg in oklab, #FFFFFF 0%, #F5F9FD 100%); --form-edge: inset 0 0 0 1px rgba(47, 111, 181, .14), 0 40px 80px -48px rgba(11, 35, 64, .5);
+  --field-bg: var(--white); --field-line: #CBD6E1; --ring: rgba(47, 111, 181, .18); --err: #B42318;
+  --grain-o: .04;
+}
+.nav__bar { -webkit-backdrop-filter: blur(18px) saturate(1.3); backdrop-filter: blur(18px) saturate(1.3); }
+
+/* hero: nagłówek na jasnym tle, wideo w kaflu rozszerza się do pełnej szerokości przy przewijaniu */
+.hero { height: 100svh; min-height: 720px; display: flex; flex-direction: column; gap: 32px; padding: 128px 0 24px; --gx0: max(var(--gut), (100vw - var(--maxw)) / 2);
+  background: radial-gradient(45% 55% at 100% 0%, rgba(156, 195, 238, .5), rgba(156, 195, 238, 0) 65%), radial-gradient(35% 45% at 0% 0%, rgba(47, 111, 181, .08), rgba(47, 111, 181, 0) 70%), #fff; }
+.hero__text { order: 1; display: grid; grid-template-columns: repeat(12, 1fr); column-gap: 24px; align-items: end; }
+.hero__title { grid-column: 1 / span 8; font-size: clamp(38px, 4.6vw, 70px); }
+.hero__aside { grid-column: 9 / span 4; grid-row: 1; display: grid; gap: 22px; padding-bottom: 6px; }
+.hero__lead { color: var(--fg-2); font-size: clamp(15px, 1.15vw, 17px); }
+.hero__brands { grid-column: 1 / -1; margin-top: 28px; }
+.hero__brands .pl--al { filter: brightness(0); opacity: .82; }
+.hero__media { order: 2; position: relative; flex: 1; min-height: 260px;
+  clip-path: inset(0 calc(var(--gx0) * (1 - var(--hp, 0))) round calc(28px * (1 - var(--hp, 0)))); background: var(--navy); }
+.hero__video { position: absolute; inset: 0; }
+.hero__shade { position: absolute; inset: 0; background: linear-gradient(0deg in oklab, rgba(7, 26, 49, .45) 0%, rgba(47, 111, 181, .1) 30%, rgba(7, 26, 49, 0) 50%); pointer-events: none; }
+.hero__pause { position: absolute; right: calc(var(--gx0) * (1 - var(--hp, 0)) + 18px); bottom: 18px; }
+
+/* o firmie */
+.about { background: radial-gradient(50% 60% at 100% 10%, rgba(156, 195, 238, .45), rgba(156, 195, 238, 0) 65%), #fff; }
+
+/* oferta */
+.offer { background: radial-gradient(55% 60% at 0% 0%, rgba(156, 195, 238, .5), rgba(156, 195, 238, 0) 60%), radial-gradient(50% 60% at 100% 100%, rgba(47, 111, 181, .12), rgba(47, 111, 181, 0) 65%), var(--mist); }
+.tile { box-shadow: 0 30px 60px -40px rgba(11, 35, 64, .55); }
+.tiles__dots i.is-on { background: var(--water); }
+
+/* parki: spotlight na jasnym tle */
+.spot { background: var(--mist); }
+
+/* baseny sportowe */
+.sport { background: radial-gradient(50% 60% at 100% 40%, rgba(156, 195, 238, .45), rgba(156, 195, 238, 0) 65%), #fff; }
+
+/* współpraca */
+.proc { --bg-sec: var(--mist); background: radial-gradient(55% 60% at 0% 100%, rgba(156, 195, 238, .5), rgba(156, 195, 238, 0) 65%), var(--mist); }
+
+/* dla kogo */
+.who { background: radial-gradient(50% 60% at 100% 0%, rgba(156, 195, 238, .4), rgba(156, 195, 238, 0) 70%), #fff; }
+.who__card .ico { box-shadow: 0 0 0 5px #fff, var(--ico-edge); }
+
+/* kontakt: kafel z wideo nad formularzem po lewej */
+.contact { background: radial-gradient(60% 70% at 0% 100%, rgba(156, 195, 238, .55), rgba(156, 195, 238, 0) 65%), radial-gradient(50% 50% at 100% 0%, rgba(47, 111, 181, .12), rgba(47, 111, 181, 0) 70%), var(--mist); }
+.contact__media { display: none; }
+
+/* stopka */
+.footer { background: radial-gradient(70% 55% at 50% 115%, rgba(156, 195, 238, .55), rgba(156, 195, 238, 0) 70%), #fff; --logo-top: var(--navy); --logo-water: var(--water); }
+.footer__brands .pl--al { filter: brightness(0); opacity: .82; }
+
+@media (max-width: 1023px) {
+  .hero__title, .hero__aside { grid-column: 1 / -1; }
+  .hero__aside { grid-row: auto; margin-top: 20px; }
+}
+@media (max-width: 767px) {
+  .hero { min-height: 680px; padding-top: 96px; gap: 20px; }
+  .hero__actions .btn { flex: 1; }
+  .hero__brands { margin-top: 18px; }
+  .hero__media { min-height: 220px; }
+}
+
+/* ------------------------------------------------------------------ serwis (B) */
+:root {
+  --panel-bg: rgba(255, 255, 255, .96); --panel-fg: var(--navy); --panel-fg-2: var(--steel); --panel-line: #E3E9EF;
+  --panel-hover: #EEF3F8; --panel-hover-2: #E3ECF6; --panel-shadow: 0 50px 120px -40px rgba(11, 35, 64, .45);
+  --phero-bg: radial-gradient(45% 60% at 100% 0%, rgba(156, 195, 238, .5), rgba(156, 195, 238, 0) 65%), radial-gradient(35% 45% at 0% 0%, rgba(47, 111, 181, .06), rgba(47, 111, 181, 0) 70%), #fff;
+  --phero-bg-solid: #fff;
+  --sec-a: #fff; --sec-b: var(--mist); --sec-c: radial-gradient(55% 60% at 0% 100%, rgba(156, 195, 238, .5), rgba(156, 195, 238, 0) 65%), var(--mist);
+  --img-well: #F1F5F9; --badge-bg: #E6EFF9; --badge-fg: var(--water);
+  --added-bg: var(--navy); --added-fg: var(--white); --bridge-bg: linear-gradient(140deg in oklab, #153F72, #0B2340);
+  --cta-bg: radial-gradient(60% 70% at 0% 100%, rgba(156, 195, 238, .55), rgba(156, 195, 238, 0) 65%), var(--mist);
+  --brand-filter: none;
+}
+.pdp__brand .pl--al, .bcard__logo .pl--al { filter: brightness(0); opacity: .82; }
