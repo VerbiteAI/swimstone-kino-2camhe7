@@ -88,3 +88,5 @@
   --brand-filter: none;
 }
 .pdp__brand .pl--al, .bcard__logo .pl--al { filter: brightness(0); opacity: .82; }
+.hero__brands--partners { margin-top: 14px; }
+.hero__brands--partners .pl { filter: grayscale(1); opacity: .7; }

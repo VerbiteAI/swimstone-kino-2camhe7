@@ -325,7 +325,11 @@
       e.preventDefault();
       let ok = true;
       form.querySelectorAll('[required]').forEach((f) => {
-        const bad = f.type === 'checkbox' ? !f.checked : !f.value.trim();
+        const val = f.value.trim();
+        const bad = f.type === 'checkbox' ? !f.checked
+          : !val
+          || (f.type === 'email' && !/^[^@\s]+@[^@\s]+\.[^@\s]{2,}$/.test(val))
+          || (f.matches('[data-tel-mask]') && val.replace(/\D/g, '').length < 9);
         f.closest('.field, .check').classList.toggle('is-invalid', bad);
         f.setAttribute('aria-invalid', String(bad));
         if (bad && ok) { f.focus(); ok = false; }
@@ -334,6 +338,44 @@
     });
     form.addEventListener('input', (e) => { const box = e.target.closest('.is-invalid'); if (box) box.classList.remove('is-invalid'); });
   });
+  /* ---------------------------------------------------------------- numery telefonów ukryte do kliknięcia; jedno kliknięcie odsłania wszystkie (zapamiętane) */
+  const TEL_KEY = 'swimstone-tel';
+  const telLinks = [...d.querySelectorAll('a[href^="tel:"]')].filter((a) => a.textContent.replace(/\D/g, '').length >= 9);
+  const maskTel = (t) => { const n = t.replace(/\D/g, '').length; let i = 0; return t.replace(/\d/g, (m) => (++i > n - 6 ? '•' : m)); };
+  let telShown = false;
+  try { telShown = localStorage.getItem(TEL_KEY) === '1'; } catch { /* prywatny tryb */ }
+  const telButtons = [...d.querySelectorAll('[data-tel-show]')];
+  const showTel = () => {
+    telShown = true;
+    try { localStorage.setItem(TEL_KEY, '1'); } catch { /* prywatny tryb */ }
+    telLinks.forEach((a) => { if (a.dataset.telFull) a.textContent = a.dataset.telFull; a.classList.remove('is-masked'); a.removeAttribute('aria-label'); });
+    telButtons.forEach((b) => { b.hidden = true; });
+  };
+  if (telShown) telButtons.forEach((b) => { b.hidden = true; });
+  else {
+    telLinks.forEach((a) => {
+      a.dataset.telFull = a.textContent;
+      a.textContent = maskTel(a.textContent);
+      a.classList.add('is-masked');
+      a.setAttribute('aria-label', 'Pokaż numer telefonu');
+      a.addEventListener('click', (e) => { if (!telShown) { e.preventDefault(); showTel(); } });
+    });
+    telButtons.forEach((b) => b.addEventListener('click', showTel));
+  }
+
+  /* ---------------------------------------------------------------- maska telefonu ___-___-___ */
+  d.querySelectorAll('[data-tel-mask]').forEach((inp) => {
+    inp.addEventListener('input', (e) => {
+      const v = inp.value;
+      if (v.trim().startsWith('+')) { inp.value = v.replace(/[^\d+ ]/g, ''); return; }
+      if (e.inputType && e.inputType.startsWith('delete')) { inp.value = v.replace(/-$/, ''); return; }
+      let dg = v.replace(/\D/g, '');
+      if (dg.length > 9 && dg.startsWith('48')) dg = dg.slice(2);
+      dg = dg.slice(0, 9);
+      inp.value = [dg.slice(0, 3), dg.slice(3, 6), dg.slice(6, 9)].filter(Boolean).join('-');
+    });
+  });
+
   /* ---------------------------------------------------------------- podpowiedzi lokalizacji (Photon, dane OpenStreetMap, bez klucza API) */
   const GEO_URL = 'https://photon.komoot.io/api/';
   const PL_BOX = '14.07,49.0,24.15,54.84';

@@ -90,3 +90,5 @@
   --count-ring: var(--navy);
 }
 .hubsec:nth-of-type(even) { background: var(--deep); }
+.hero__brands--partners { margin-top: 16px; padding-top: 0; border-top: 0; }
+.hero__brands--partners .pl { opacity: .62; }
