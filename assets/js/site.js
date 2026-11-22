@@ -143,7 +143,8 @@
       c.hidden = !quote.length;
       if (pop) { c.classList.remove('is-pop'); void c.offsetWidth; c.classList.add('is-pop'); }
     });
-    qList.innerHTML = quote.map((q, i) => `<li><img src="${fixImg(q.img)}" alt=""><span>${esc(q.name)}</span><button type="button" data-quote-del="${i}" aria-label="Usuń: ${esc(q.name)}">${X}</button></li>`).join('');
+    const item = (q, i) => `<li>${q.img ? `<img src="${fixImg(q.img)}" alt="" loading="lazy">` : '<i class="q-noimg" aria-hidden="true"></i>'}<span>${esc(q.name)}</span><button type="button" data-quote-del="${i}" aria-label="Usuń z zapytania: ${esc(q.name)}">${X}</button></li>`;
+    qList.innerHTML = quote.map(item).join('');
     qEmpty.hidden = quote.length > 0;
     d.querySelectorAll('[data-quote-add]').forEach((b) => {
       const on = quote.some((q) => q.name === b.dataset.name);
@@ -154,9 +155,19 @@
     });
     d.querySelectorAll('[data-form-quote]').forEach((box) => {
       box.hidden = !quote.length;
-      box.querySelector('[data-form-quote-list]').innerHTML = quote.map((q) => `<li>${esc(q.name)}</li>`).join('');
+      box.querySelector('[data-form-quote-list]').innerHTML = quote.map(item).join('');
+      const n = box.querySelector('[data-form-quote-n]');
+      if (n) n.textContent = quote.length;
+      const inp = box.querySelector('[data-form-quote-input]');
+      if (inp) inp.value = quote.map((q) => q.name).join('; ');
     });
   };
+  d.addEventListener('error', (e) => {
+    const img = e.target;
+    if (img.tagName === 'IMG' && img.closest('[data-quote-list], [data-form-quote-list]')) {
+      const ph = d.createElement('i'); ph.className = 'q-noimg'; ph.setAttribute('aria-hidden', 'true'); img.replaceWith(ph);
+    }
+  }, true);
   d.addEventListener('click', (e) => {
     const add = e.target.closest('[data-quote-add]');
     if (add) {
@@ -165,7 +176,15 @@
       save(); syncQuote(i < 0);
     }
     const del = e.target.closest('[data-quote-del]');
-    if (del) { quote.splice(+del.dataset.quoteDel, 1); save(); syncQuote(); }
+    if (del) {
+      const list = del.closest('ul');
+      const at = +del.dataset.quoteDel;
+      quote.splice(at, 1); save(); syncQuote();
+      const rest = list ? list.querySelectorAll('[data-quote-del]') : [];
+      const next = rest[Math.min(at, rest.length - 1)];
+      if (next) next.focus();
+      else { const box = list && list.closest('[data-form-quote], [data-quote]'); const f = box && box.querySelector('[data-quote-close], textarea, input:not([type=hidden])'); if (f) f.focus(); else { const form = list && list.closest('form'); if (form) (form.querySelector('textarea') || form).focus(); } }
+    }
   });
   const openDrawer = () => { closeMega(); drawer.hidden = false; d.body.style.overflow = 'hidden'; drawer.querySelector('[data-quote-close]').focus(); };
   const closeDrawer = () => { drawer.hidden = true; d.body.style.overflow = ''; };
@@ -314,6 +333,79 @@
       form.querySelector('.form__note').hidden = !ok;
     });
     form.addEventListener('input', (e) => { const box = e.target.closest('.is-invalid'); if (box) box.classList.remove('is-invalid'); });
+  });
+  /* ---------------------------------------------------------------- podpowiedzi lokalizacji (Photon, dane OpenStreetMap, bez klucza API) */
+  const GEO_URL = 'https://photon.komoot.io/api/';
+  const PL_BOX = '14.07,49.0,24.15,54.84';
+  const GEO_SKIP = new Set(['highway', 'railway', 'public_transport', 'historic', 'shop', 'power', 'office', 'craft', 'man_made', 'barrier', 'emergency', 'aeroway', 'boundary']);
+  const GEO_KIND = { reservoir: 'zalew', lake: 'jezioro', pond: 'staw', river: 'rzeka', canal: 'kanał', water: 'akwen', bay: 'zatoka', swimming_pool: 'pływalnia', water_park: 'aquapark', sports_centre: 'obiekt sportowy', beach_resort: 'kąpielisko', swimming_area: 'kąpielisko', beach: 'plaża', marina: 'przystań', camp_site: 'kemping', hotel: 'hotel', city: 'miasto', town: 'miasto', village: 'wieś', hamlet: 'osada', suburb: 'dzielnica', neighbourhood: 'osiedle', park: 'park' };
+  let geoN = 0;
+  d.querySelectorAll('input[name="where"]').forEach((input) => {
+    const id = `geo-${++geoN}`;
+    const list = d.createElement('ul');
+    list.className = 'geo'; list.id = id; list.hidden = true;
+    list.setAttribute('role', 'listbox'); list.setAttribute('aria-label', 'Podpowiedzi lokalizacji');
+    const coords = d.createElement('input');
+    coords.type = 'hidden'; coords.name = 'where_geo';
+    input.after(list, coords);
+    input.closest('.field').classList.add('field--geo');
+    input.autocomplete = 'off';
+    input.setAttribute('role', 'combobox'); input.setAttribute('aria-autocomplete', 'list');
+    input.setAttribute('aria-expanded', 'false'); input.setAttribute('aria-controls', id);
+    let items = []; let cur = -1; let timer; let ctrl;
+    const close = () => { list.hidden = true; cur = -1; input.setAttribute('aria-expanded', 'false'); input.removeAttribute('aria-activedescendant'); };
+    const where = (p) => [p.city || p.county, p.state && p.state.replace('województwo ', 'woj. ')]
+      .filter((x, i, a) => x && x !== p.name && a.indexOf(x) === i).join(', ');
+    const render = () => {
+      list.innerHTML = items.map((it, i) => `<li role="option" id="${id}-${i}" aria-selected="${i === cur}"><b>${esc(it.name)}</b><small>${esc([it.kind, it.place].filter(Boolean).join(' · '))}</small></li>`).join('')
+        + '<li class="geo__src" aria-hidden="true">Podpowiedzi: © OpenStreetMap</li>';
+      const open = items.length > 0;
+      list.hidden = !open; input.setAttribute('aria-expanded', String(open));
+      if (cur >= 0) input.setAttribute('aria-activedescendant', `${id}-${cur}`); else input.removeAttribute('aria-activedescendant');
+    };
+    const pick = (i) => {
+      const it = items[i];
+      if (!it) return;
+      input.value = it.place ? `${it.name}, ${it.place}` : it.name;
+      coords.value = it.geo;
+      close();
+    };
+    const query = async (q) => {
+      if (ctrl) ctrl.abort();
+      ctrl = new AbortController();
+      try {
+        const r = await fetch(`${GEO_URL}?q=${encodeURIComponent(q)}&limit=12&lang=default&bbox=${PL_BOX}`, { signal: ctrl.signal });
+        const data = await r.json();
+        const seen = new Set();
+        items = (data.features || [])
+          .filter((f) => { const p = f.properties; return p.name && p.countrycode === 'PL' && !GEO_SKIP.has(p.osm_key) && !/stop|platform/.test(p.osm_value); })
+          .map((f) => { const p = f.properties; return { name: p.name, kind: GEO_KIND[p.osm_value] || '', place: where(p), geo: `${f.geometry.coordinates[1]},${f.geometry.coordinates[0]}` }; })
+          .filter((it) => { const k = `${it.name}|${it.place}`; if (seen.has(k)) return false; seen.add(k); return true; })
+          .slice(0, 6);
+        cur = -1;
+        if (input.value.trim() === q) render();
+      } catch (err) { if (err.name !== 'AbortError') close(); }
+    };
+    input.addEventListener('input', () => {
+      coords.value = '';
+      clearTimeout(timer);
+      const q = input.value.trim();
+      if (q.length < 3) { items = []; close(); return; }
+      timer = setTimeout(() => query(q), 260);
+    });
+    input.addEventListener('keydown', (e) => {
+      if (list.hidden || !items.length) return;
+      if (e.key === 'ArrowDown') { e.preventDefault(); cur = (cur + 1) % items.length; render(); }
+      else if (e.key === 'ArrowUp') { e.preventDefault(); cur = (cur - 1 + items.length) % items.length; render(); }
+      else if (e.key === 'Enter' && cur >= 0) { e.preventDefault(); pick(cur); }
+      else if (e.key === 'Escape') { e.stopPropagation(); close(); }
+    });
+    list.addEventListener('mousedown', (e) => e.preventDefault());
+    list.addEventListener('click', (e) => {
+      const li = e.target.closest('[role="option"]');
+      if (li) pick([...list.querySelectorAll('[role="option"]')].indexOf(li));
+    });
+    input.addEventListener('blur', () => setTimeout(close, 150));
   });
   d.querySelectorAll('[data-chip]').forEach((a) => a.addEventListener('click', () => {
     const r = d.querySelector(`[data-form] input[name="typ"][value="${a.dataset.chip}"]`);

@@ -421,3 +421,70 @@ textarea { font: inherit; color: inherit; }
   .btn { white-space: normal; height: auto; min-height: 54px; padding-block: 12px; line-height: 1.25; text-align: center; }
   .btn--sm { min-height: 0; }
 }
+.person__img { flex: none; width: 64px; height: 64px; border-radius: 50%; object-fit: cover; object-position: 50% 30%; background: var(--hover); }
+.team__photo { flex: none; width: 200px; aspect-ratio: 4 / 5; height: auto; border-radius: var(--r-m); object-fit: cover; }
+@media (max-width: 767px) { .team__photo { width: 100%; max-width: 320px; } }
+/* lista zapytania w formularzu: zdjęcia i usuwanie */
+.form__quote { padding: 16px 14px 12px; }
+.form__qh { display: flex; align-items: baseline; gap: 8px; padding-inline: 6px; }
+.form__qh span { min-width: 22px; padding: 2px 7px; border-radius: 999px; background: var(--badge-bg, var(--water)); color: var(--badge-fg, #fff); font-size: 12.5px; text-align: center; }
+.form__quote ul { gap: 2px; font-size: 15px; color: inherit; }
+.form__quote li::before { content: none; }
+.form__quote li { display: grid; grid-template-columns: 52px minmax(0, 1fr) auto; gap: 14px; align-items: center; padding: 6px; border-radius: 12px; transition: background-color .2s; }
+.form__quote li:hover { background: color-mix(in oklab, currentColor 6%, transparent); }
+.form__quote img, .q-noimg { width: 52px; height: 52px; border-radius: 10px; object-fit: contain; background: #fff; padding: 4px; }
+.q-noimg { display: block; background: #EEF3F8; }
+.drawer__list .q-noimg { width: 56px; height: 56px; border-radius: 12px; }
+.form__quote li span { line-height: 1.35; }
+.form__quote button { display: grid; place-items: center; width: 40px; height: 40px; border: 0; border-radius: 999px; background: transparent; color: inherit; opacity: .62; cursor: pointer; transition: background-color .2s, opacity .2s; }
+.form__quote button:hover { opacity: 1; background: color-mix(in oklab, currentColor 10%, transparent); }
+.form__quote button:active { transform: scale(.94); }
+.form__quote button svg { width: 16px; height: 16px; }
+/* podpowiedzi lokalizacji */
+.field--geo { position: relative; }
+.geo { position: absolute; z-index: 30; left: 0; right: 0; top: calc(100% + 6px); max-height: 330px; overflow-y: auto; margin: 0; padding: 6px; list-style: none; border-radius: 16px; background: #fff; color: var(--navy); box-shadow: 0 0 0 1px rgba(7, 26, 49, .08), 0 24px 60px -18px rgba(7, 26, 49, .45); animation: geoin .18s var(--ease-out); }
+.geo[hidden] { display: none; }
+.geo [role="option"] { display: grid; gap: 2px; padding: 10px 12px; border-radius: 10px; cursor: pointer; transition: background-color .15s; }
+.geo [role="option"] b { font-size: 15px; font-weight: 500; }
+.geo [role="option"] small { font-size: 13px; font-weight: 400; color: #5B6B7D; }
+.geo [role="option"]:hover, .geo [aria-selected="true"] { background: #EEF3F8; }
+.geo__src { padding: 6px 12px 4px; font-size: 11.5px; font-weight: 400; color: #8796A6; }
+@keyframes geoin { from { opacity: 0; transform: translateY(-4px); } }
+/* kontakt: wstęp, karty w rzędzie, panel formularza ze zdjęciem */
+.kontakt__intro { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: 24px; align-items: end; }
+.kontakt__intro .kontakt__info { grid-column: 1 / span 5; }
+.kcards--row { grid-column: 6 / span 7; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.kcards--row .kcard { flex-direction: column; gap: 12px; height: 100%; }
+.kpanel { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); margin-top: 56px; overflow: hidden; border-radius: var(--r-l); background: var(--form-bg); box-shadow: var(--form-edge); }
+.kpanel__form { grid-column: 1; grid-row: 1; padding: 48px 52px 52px; }
+.kpanel__photo { grid-column: 2; grid-row: 1; position: relative; min-height: 520px; overflow: hidden; background: #BFCAD2; }
+.kpanel__photo img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 50% 32%; transition: transform .8s var(--ease-out); }
+.kpanel:hover .kpanel__photo img { transform: scale(1.02); }
+.kpanel__title { font-size: clamp(28px, 2.6vw, 38px); max-width: none; }
+.kpanel__who { margin: 12px 0 28px; max-width: 34em; color: var(--fg-2); }
+.kpanel .form { grid-column: auto; margin: 0; padding: 0; background: none; box-shadow: none; border-radius: 0; }
+@media (max-width: 1023px) {
+  .kontakt__intro .kontakt__info, .kcards--row { grid-column: 1 / -1; }
+  .kcards--row { margin-top: 28px; }
+  .kpanel { grid-template-columns: minmax(0, 1fr); margin-top: 40px; }
+  .kpanel__photo { grid-column: 1; grid-row: 1; min-height: 0; aspect-ratio: 4 / 3; }
+  .kpanel__photo img { object-position: 50% 22%; }
+  .kpanel__form { grid-column: 1; grid-row: 2; padding: 36px; }
+}
+@media (max-width: 767px) {
+  .kcards--row { grid-template-columns: minmax(0, 1fr); }
+  .kcards--row .kcard { flex-direction: row; }
+  .kpanel__photo { aspect-ratio: 1 / 1; }
+  .kpanel__form { padding: 26px 18px 28px; }
+  .kpanel .form { padding: 0; }
+}
+/* karty cech ze zdjęciem */
+.fitem--photo { padding: 0; overflow: hidden; gap: 0; transition: transform .3s var(--ease), box-shadow .3s; }
+.fitem--photo:hover { transform: translateY(-2px); }
+.fitem__media { aspect-ratio: 4 / 3; overflow: hidden; background: var(--img-well); }
+.fitem__media img { width: 100%; height: 100%; object-fit: cover; transition: transform .7s var(--ease-out); }
+.fitem--photo:hover .fitem__media img { transform: scale(1.03); }
+.fitem__body { display: grid; gap: 14px; align-content: start; padding: 20px 22px 24px; }
+.fitem__body > .ico { margin-top: -46px; position: relative; z-index: 1; }
+.ccard__media--product { background: #fff; }
+.ccard__media--product img { object-fit: contain; padding: 6% 10%; }
